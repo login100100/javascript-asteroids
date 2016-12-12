@@ -6,6 +6,7 @@ var gameProperties = {
 
 var states = {
     game: "game",
+	main: "main",
 };
 
 var graphicAssets = {
@@ -241,6 +242,8 @@ gameState.prototype = {
 		
 		if (this.shipLives) {
             game.time.events.add(Phaser.Timer.SECOND * shipProperties.timeToReset, this.resetShip, this);
+        } else {
+            game.time.events.add(Phaser.Timer.SECOND * shipProperties.timeToReset, this.endGame, this);
         }
     },
 	
@@ -283,8 +286,35 @@ gameState.prototype = {
         
         this.resetAsteroids();
     },
+	
+	endGame: function () {
+        game.state.start(states.main);
+    },
+		
 };
 
+var mainState = function(game){
+    this.tf_start;
+};
+	mainState.prototype = {
+    create: function () {
+        var startInstructions = 'Welcome! \n Use arrows to move \n Use space to fire \n Good luck!';
+        
+        this.tf_start = game.add.text(game.world.centerX, game.world.centerY, startInstructions, fontAssets.counterFontStyle);
+        this.tf_start.align = 'center';
+        this.tf_start.anchor.set(0.5, 0.5);
+        
+		game.input.onDown.addOnce(this.startGame, this);
+    },
+    
+    startGame: function () {
+        game.state.start(states.game);
+    },
+};
+
+
+
 var game = new Phaser.Game(gameProperties.screenWidth, gameProperties.screenHeight, Phaser.AUTO, 'gameDiv');
+game.state.add(states.main, mainState);
 game.state.add(states.game, gameState);
-game.state.start(states.game);
+game.state.start(states.main);
